@@ -132,17 +132,15 @@ import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
 
-import gymnasium as gym
 
 # -------------------------------------------------
 # Create Environment
 # -------------------------------------------------
 
 env = gym.make("FrozenLake-v1", is_slippery=False)
-n_states = env.observation_space.n
-n_actions = env.action_space.n
-print(f"Number of states: {n_states}")
-print(f"Number of actions: {n_actions}")
+
+num_states = env.observation_space.n
+num_actions = env.action_space.n
 
 # -------------------------------------------------
 # Hyperparameters
@@ -210,20 +208,34 @@ def generate_episode(epsilon):
 
 # Write your code here
 epsilon = epsilon_start
-for episode_idx in range(num_episodes):
+for episode_num in range(num_episodes):
+
+    # Generate a complete episode
     episode = generate_episode(epsilon)
+
+    # Calculate total reward
+    total_reward = sum(step[2] for step in episode)
+
+    episode_rewards.append(total_reward)
+
+    # Initialize return
     G = 0
-    for i in reversed(range(len(episode))):
-        state, action, reward = episode[i]
+
+    # Process the episode backwards
+    for state, action, reward in reversed(episode):
+
+        # Calculate return
         G = reward + gamma * G
-        first_occurrence = next((j for j, x in enumerate(episode) if x[0] == state and x[1] == action), -1)
-        if first_occurrence == i:
-            Q[state, action] += alpha * (G - Q[state, action])
-    total_episode_reward = sum([item[2] for item in episode])
-    episode_rewards.append(total_episode_reward)
-    epsilon = max(epsilon_min, epsilon * epsilon_decay)
-    if (episode_idx + 1) % 1000 == 0:
-        print(f"Episode {episode_idx + 1}/{num_episodes}, Epsilon: {epsilon:.4f}")
+
+        # Incremental Monte Carlo update
+        Q[state, action] = Q[state, action] + \
+            alpha * (G - Q[state, action])
+
+    # Reduce epsilon gradually
+    epsilon = max(
+        epsilon_min,
+        epsilon * epsilon_decay
+    )
 # -------------------------------------------------
 # Extract Greedy Policy
 # -------------------------------------------------
