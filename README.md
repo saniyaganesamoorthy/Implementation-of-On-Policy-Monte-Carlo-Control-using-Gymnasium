@@ -306,7 +306,7 @@ env.close()
 
 
 Average reward over last 1000 episodes: 0.948
-```
+
 <img width="1068" height="604" alt="image" src="https://github.com/user-attachments/assets/1552c17b-7171-4b52-acaa-bb66306e4218" />
 
 ---
